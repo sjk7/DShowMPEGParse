@@ -1,0 +1,6 @@
+LIBRARY		mp3parse.dll
+EXPORTS
+	DllGetClassObject PRIVATE
+	DllCanUnloadNow PRIVATE
+	DllRegisterServer PRIVATE
+	DllUnregisterServer PRIVATE

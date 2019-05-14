@@ -1,0 +1,30 @@
+﻿Build started 14/05/2019 21:16:17.
+     1>Project "V:\v3final\CWrappers\MP3Parse\MP3Parse.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating ".\Release\MP3Parse.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio\VC98\BIN\CL.exe /c /IV:\DX90SDK\Samples\C++\DirectShow\BaseClasses /IV:\DX90SDK\Include /Zi /nologo /W3 /WX- /Ox /Ob2 /Oi /Ot /Oy- /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D MP3PARSE_EXPORTS /D _VC80_UPGRADE=0x0600 /D _WINDLL /D _MBCS /GF /EHsc /MD /Gy /GR /Fo".\Release\\" /Fd".\Release\vc100.pdb" /Gz /TP mp3parse.cpp Parser.cpp puller.cpp
+         mp3parse.cpp
+     1>mp3parse.cpp(597): warning C4101: '_frameinfo' : unreferenced local variable
+         Parser.cpp
+         puller.cpp
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio\VC98\BIN\link.exe /OUT:".\Release\MP3Parse.dll" /INCREMENTAL:NO /NOLOGO /LIBPATH:V:\DX90SDK\Samples\C++\DirectShow\BaseClasses\RELEASE /LIBPATH:V:\DX90SDK\Lib winmm.lib strmiids.lib odbc32.lib odbccp32.lib V:\DX90SDK\Samples\C++\DirectShow\BaseClasses\Release\strmbasE.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /DEF:".\mp3parse.def" /DEBUG /PDB:"V:\v3final\CWrappers\MP3Parse\Release\MP3Parse.pdb" /SUBSYSTEM:CONSOLE /ENTRY:"DllEntryPoint@12" /IMPLIB:".\Release\MP3Parse.lib" /MACHINE:X86 /DLL .\Release\mp3parse.obj
+         .\Release\Parser.obj
+         .\Release\puller.obj
+            Creating library .\Release\MP3Parse.lib and object .\Release\MP3Parse.exp
+         MP3Parse.vcxproj -> V:\v3final\CWrappers\MP3Parse\.\Release\MP3Parse.dll
+       CustomBuildStep:
+         Description: Performing Custom Build Step
+         regsvr32 /c "V:\v3final\CWrappers\MP3Parse\.\Release\MP3Parse.dll" 
+         echo regsvr32 exec. time > ".\Release\regsvr32.trg" 
+         :VCEnd
+       FinalizeBuildStatus:
+         Deleting file ".\Release\MP3Parse.unsuccessfulbuild".
+         Touching ".\Release\MP3Parse.lastbuildstate".
+     1>Done Building Project "V:\v3final\CWrappers\MP3Parse\MP3Parse.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.13
