@@ -223,6 +223,9 @@ HRESULT CMP3ParseFilter::FillSample(IAsyncReader* pReader, IMediaSample* pSample
 CMP3ParseFilter::CMP3ParseFilter(LPUNKNOWN pUnk, HRESULT *phr) :
 	CParserFilter(NAME("MP3 Parser Filter: Improved"), pUnk, CLSID_CMp3Parser)
 {
+#ifdef _DEBUG
+	my::buffer_test();
+#endif
 	Init();
 }
 
@@ -683,6 +686,7 @@ HRESULT CMP3ParseFilter::getframeinfo(void)
 	DWORD framesize;
 	double duration;
 	FRAMEINFO * _frameinfo,* preframeinfo;
+	(void)_frameinfo;
 	unsigned long head;
 	int i;
 	HRESULT hr;

@@ -45,6 +45,7 @@ public:
 private:
 	long read_tags(mp3info& info, IAsyncReader *reader, const LONGLONG Total);
 	void BuildWaveFormatEx(PWAVEFORMATEX * ppwfe, DWORD * pdwLength);
+
 	void Init();
 //	LONG m_lCurrentFrame;				//現在のフレームナンバー
 //	REFERENCE_TIME m_rtStart;			//シーク後の開始位置

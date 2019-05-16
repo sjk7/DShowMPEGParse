@@ -1,14 +1,14 @@
-﻿Build started 16/05/2019 04:16:36.
+﻿Build started 16/05/2019 08:24:01.
      1>Project "V:\v3final\CWrappers\DShow\DShowMPEGParse\MP3Parse.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
-         Touching ".\Debug\MP3Parse.unsuccessfulbuild".
+         Creating ".\Debug\MP3Parse.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio\VC98\BIN\CL.exe /c /IV:\DX90SDK\Samples\C++\DirectShow\BaseClasses /IV:\DX90SDK\Include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _USRDLL /D MP3PARSE_EXPORTS /D _VC80_UPGRADE=0x0600 /D _WINDLL /D _MBCS /Gm /EHsc /MDd /Fo".\Debug\\" /Fd".\Debug\vc100.pdb" /FR".\Debug\\" /Gz /TP mp3parse.cpp puller.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio\VC98\BIN\CL.exe /c /IV:\DX90SDK\Samples\C++\DirectShow\BaseClasses /IV:\DX90SDK\Include /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _USRDLL /D MP3PARSE_EXPORTS /D _VC80_UPGRADE=0x0600 /D _WINDLL /D _MBCS /Gm /EHsc /MDd /Fo".\Debug\\" /Fd".\Debug\vc100.pdb" /FR".\Debug\\" /Gz /TP Parser.cpp mp3parse.cpp puller.cpp
          mp3parse.cpp
-         STREAMS.H included TWICE
-     1>v:\v3final\cwrappers\dshow\dshowmpegparse\mp3parse.cpp(685): warning C4101: '_frameinfo' : unreferenced local variable
          Generating Code...
+         STREAMS.H included TWICE
          Skipping... (no relevant changes detected)
+         Parser.cpp
          puller.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio\VC98\BIN\link.exe /OUT:".\Debug\MP3Parse.dll" /INCREMENTAL:YES /NOLOGO /LIBPATH:V:\DX90SDK\Samples\C++\DirectShow\BaseClasses\DEBUG /LIBPATH:V:\DX90SDK\Lib winmm.lib strmiids.lib odbc32.lib odbccp32.lib V:\DX90SDK\Samples\C++\DirectShow\BaseClasses\Debug\strmbasD.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /DEF:".\mp3parse.def" /DEBUG /PDB:"V:\v3final\CWrappers\DShow\DShowMPEGParse\Debug\MP3Parse.pdb" /SUBSYSTEM:CONSOLE /ENTRY:"DllEntryPoint@12" /IMPLIB:".\Debug\MP3Parse.lib" /MACHINE:X86 /DLL .\Debug\mp3parse.obj
@@ -18,10 +18,7 @@
        BscMake:
          All outputs are up-to-date.
        CustomBuildStep:
-         Description: Performing Custom Build Step
-         regsvr32 /c "V:\v3final\CWrappers\DShow\DShowMPEGParse\.\Debug\MP3Parse.dll" 
-         echo regsvr32 exec. time > ".\Debug\regsvr32.trg" 
-         :VCEnd
+       Skipping target "CustomBuildStep" because all output files are up-to-date with respect to the input files.
        FinalizeBuildStatus:
          Deleting file ".\Debug\MP3Parse.unsuccessfulbuild".
          Touching ".\Debug\MP3Parse.lastbuildstate".
@@ -29,4 +26,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.26
+Time Elapsed 00:00:00.46
