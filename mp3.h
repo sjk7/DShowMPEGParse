@@ -50,7 +50,7 @@ long freqs[9] = { 44100, 48000, 32000,
                   11025 , 12000 , 8000 };
 typedef struct mp3info {
 	int freq,nch;
-	int lsf,frames;
+	int lsf,frames, framesize;
 	LONGLONG payload_size;
 	LONGLONG payload_end_postiion;
 	LONGLONG nbytes,hpos;

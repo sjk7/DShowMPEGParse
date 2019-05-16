@@ -41,6 +41,9 @@
     <ClInclude Include="puller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="my_buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mp3parse.def">

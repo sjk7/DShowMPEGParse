@@ -6,8 +6,10 @@
 #include "parser.h"
 #include "mp3.h"
 #include <VECTOR>
+#include "my_buffer.h"
 
 typedef std::vector<FRAMEINFO> frame_vec_t;
+
 
 class CMP3ParseFilter : public CParserFilter
 {
@@ -15,6 +17,7 @@ public:
 	static CUnknown * WINAPI CreateInstance(LPUNKNOWN punk, HRESULT *pHr);
 	
 	frame_vec_t m_vec_frames;
+	my::buffer<BYTE> m_filebuf;
 
 	CMP3ParseFilter(LPUNKNOWN pUnk, HRESULT *pHr);
 	~CMP3ParseFilter();
@@ -40,7 +43,7 @@ public:
 
 	STDMETHODIMP NonDelegatingQueryInterface(REFIID riid, void **p);
 private:
-
+	long read_tags(mp3info& info, IAsyncReader *reader, const LONGLONG Total);
 	void BuildWaveFormatEx(PWAVEFORMATEX * ppwfe, DWORD * pdwLength);
 	void Init();
 //	LONG m_lCurrentFrame;				//現在のフレームナンバー

@@ -183,6 +183,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg" </Command>
     <ClInclude Include="guidmp3p.h" />
     <ClInclude Include="mp3.h" />
     <ClInclude Include="mp3parse.h" />
+    <ClInclude Include="my_buffer.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="puller.h" />
   </ItemGroup>
