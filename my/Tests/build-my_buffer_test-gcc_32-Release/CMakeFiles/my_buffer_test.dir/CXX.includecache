@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/hp/Desktop/DShowMPEGParse/my/Tests/my_buffer_test/main.cpp
+iostream
+-
+string
+-
+../../include/my_debug.h
+/home/hp/Desktop/DShowMPEGParse/my/include/my_debug.h
+
+/home/hp/Desktop/DShowMPEGParse/my/include/my_debug.h
+cassert
+-
+iostream
+-
+

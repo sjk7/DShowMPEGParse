@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="my_buffer_test"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="clang"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="my_buffer_test">
+				<Option output="/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/my_buffer_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/home/hp/Desktop/DShowMPEGParse/my/Tests/my_buffer_test/../../include"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward"/>
+					<Add directory="/usr/include/clang/8.0.1/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/llvm-8/lib/clang/8.0.1/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 my_buffer_test"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="my_buffer_test/fast">
+				<Option output="/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/my_buffer_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="clang"/>
+				<Compiler>
+					<Add directory="/home/hp/Desktop/DShowMPEGParse/my/Tests/my_buffer_test/../../include"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/x86_64-linux-gnu/c++/8"/>
+					<Add directory="/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../include/c++/8/backward"/>
+					<Add directory="/usr/include/clang/8.0.1/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/usr/lib/llvm-8/lib/clang/8.0.1/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 my_buffer_test/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/hp/Desktop/DShowMPEGParse/my/Tests/build-my_buffer_test-Clang_8-Default/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/hp/Desktop/DShowMPEGParse/my/Tests/my_buffer_test/main.cpp">
+			<Option target="my_buffer_test"/>
+		</Unit>
+		<Unit filename="/home/hp/Desktop/DShowMPEGParse/my/Tests/my_buffer_test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
