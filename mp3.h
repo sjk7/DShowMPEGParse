@@ -5,6 +5,7 @@
 #define         MPG_MD_JOINT_STEREO     1
 #define         MPG_MD_DUAL_CHANNEL     2
 #define         MPG_MD_MONO             3
+#define			MPG_HEADER_SIZE			4
 
 
 static __forceinline unsigned long BSwap(unsigned long n)
@@ -44,13 +45,19 @@ int tabsel_123[2][3][16] = {
    { {0,32,48,56,64,80,96,112,128,144,160,176,192,224,256,},
      {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,},
      {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,} }
+
+
+  // static constexpr int V2L2L3BitRates[MAX_MPEG_BITRATES] =
+  //{0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, -1};
+
+
 };
 long freqs[9] = { 44100, 48000, 32000,
                   22050, 24000, 16000 ,
                   11025 , 12000 , 8000 };
 typedef struct mp3info {
 	int freq,nch;
-	int lsf,frames, framesize;
+	int lsf,frames, framesize, bitrate, vbr;
 	LONGLONG payload_size;
 	LONGLONG payload_end_postiion;
 	LONGLONG nbytes,hpos;
@@ -128,14 +135,33 @@ int ExtractI4(unsigned char *buf)
 	x |= buf[3];
 	return x;
 }
-int head_check(const unsigned long head)
+
+
+// whats this he had commented out: 
+//	if (!((head>>17)&0x3)) 
+//		return FALSE;
+
+int head_check(unsigned long head)
 {
-    if ((head & 0xffe00000) != 0xffe00000) return FALSE;
-//	if (!((head>>17)&0x3)) return FALSE;
-	if (((head>>12)&0xf) == 0xf) return FALSE;
-	if (((head>>10)&0x3) == 0x3 ) return FALSE;
-	if ((4-((head>>17)&3)) != 3) return FALSE;
-    return TRUE;
+	
+	
+		/* first 11 bits are set to 1 for frame sync */
+		if ((head & 0xffe00000) != 0xffe00000)
+		return FALSE;
+		/* layer: 01,10,11 is 1,2,3; 00 is reserved */
+		if (!((head>>17)&3))
+		return FALSE;
+		/* 1111 means bad bitrate */
+		if (((head>>12)&0xf) == 0xf)
+		return FALSE;
+		/* 0000 means free format... which should be supported in future. */
+		if(((head>>12)&0xf) == 0x0)
+		return FALSE;
+		/* sampling freq: 11 is reserved */
+		if(((head>>10)&0x3) == 0x3 )
+			return FALSE;
+		/* here used to be a mpeg 2.5 check... re-enabled 2.5 decoding due to lack of evidence that it is really not good */
+return TRUE;
 }
 
 

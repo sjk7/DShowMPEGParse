@@ -1,1 +1,1 @@
-regsvr32 exec. time  
+regsvr32 exec. time 

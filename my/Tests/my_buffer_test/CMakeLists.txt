@@ -8,6 +8,6 @@ add_executable(${PROJECT_NAME} "main.cpp")
 include_directories(../../include)
 
 set_target_properties(my_buffer_test PROPERTIES
-            CXX_STANDARD 17
+            CXX_STANDARD 98
             CXX_EXTENSIONS OFF
             )

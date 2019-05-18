@@ -24,9 +24,13 @@ template <typename T> class mem_buf {
 };
 
 template <typename BUF> struct mem_view {
-    private:
+    
+	typedef BUF::ptr_type ptr_t;
+	mem_view(BUF& buf, int start, int finish) : m_buf(buf), m_start(start), m_finish(finish){}
+	ptr_t
+private:
     BUF& m_buf;
-    size
+    int m_start, m_finish;
 };
 
 } // namespace my

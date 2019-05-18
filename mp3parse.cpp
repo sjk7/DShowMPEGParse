@@ -1,14 +1,20 @@
 #include "mp3parse.h"
 #include <initguid.h>
 #include "guidmp3p.h"
-
+#include <algorithm>
 #include <atlbase.h>
+
+#ifndef TRACE
+#define TRACE ATLTRACE
+#endif
 
 
 //You may derive a class from CComModule and use it if you want to override
 //something, but do not change the name of _Module
 //extern CComModule _Module; // prevent compiler ,moaning!
 //#include <atlcom.h>
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,8 +118,9 @@ HRESULT CMP3ParseFilter::CompleteConnect(PIN_DIRECTION direction, IPin *pReceive
 		
 		//すでに初期化済みなら正常終了させる
 		if(frameinfo_inited == true){
-//			m_pOutput->SetDuration(info.duration);
-//			Seek(0);
+			m_pOutput->SetDuration(m_info.duration);
+//			// FIXME
+			//Seek(0);
 			return S_OK;
 		}
 		
@@ -128,7 +135,7 @@ HRESULT CMP3ParseFilter::CompleteConnect(PIN_DIRECTION direction, IPin *pReceive
 			}
 		
 		}
-		m_pOutput->SetDuration(info.duration);
+		m_pOutput->SetDuration(m_info.duration);
 		Seek(0);
 
 	}
@@ -170,7 +177,7 @@ HRESULT CMP3ParseFilter::FillSample(IAsyncReader* pReader, IMediaSample* pSample
 	    bitrate_index = ((head>>12)&0xf);
 		padding       = ((head>>9)&0x1);
 		lay           = 4-((head>>17)&3);
-		framesize = tabsel_123[info.lsf][lay-1][bitrate_index]*144000/(info.freq<<info.lsf)+padding;
+		framesize = tabsel_123[m_info.lsf][lay-1][bitrate_index]*144000/(m_info.freq<<m_info.lsf)+padding;
 		
 		if(sample_max - data_used < currentframe->size) {
 			break;
@@ -182,7 +189,7 @@ HRESULT CMP3ParseFilter::FillSample(IAsyncReader* pReader, IMediaSample* pSample
 		}
 
 		data_used += currentframe->size;
-		time_used += (double)(framesize * 8) / (tabsel_123[info.lsf][lay-1][bitrate_index] * 1000);
+		time_used += (double)(framesize * 8) / (tabsel_123[m_info.lsf][lay-1][bitrate_index] * 1000);
 
 		if(currentframe->next != NULL){
 			currentframe = currentframe->next;
@@ -223,9 +230,7 @@ HRESULT CMP3ParseFilter::FillSample(IAsyncReader* pReader, IMediaSample* pSample
 CMP3ParseFilter::CMP3ParseFilter(LPUNKNOWN pUnk, HRESULT *phr) :
 	CParserFilter(NAME("MP3 Parser Filter: Improved"), pUnk, CLSID_CMp3Parser)
 {
-#ifdef _DEBUG
-	my::buffer_test();
-#endif
+
 	Init();
 }
 
@@ -248,6 +253,9 @@ void CMP3ParseFilter::Init()
 	frameinfo_inited = false;		//frameinfoはまだ初期化していない。
 	checked_input = false;			//getmp3infoでチェックされてない。
 	seek_occured = false;
+	memset(&m_info, 0, sizeof(m_info));
+	memset(&m_id3, 0, sizeof(m_id3));
+
 }
 
 CUnknown * WINAPI CMP3ParseFilter::CreateInstance(LPUNKNOWN pUnk, HRESULT * phr)
@@ -283,8 +291,15 @@ HRESULT CMP3ParseFilter::CheckInputType(const CMediaType* mtIn)
 		if(checked_input == true){			//getmp3infoでチェック済み
 			return S_OK;
 		}
-	
-		hr = getmp3info();
+		
+		IAsyncReader *reader = ReaderOpen();
+		if (!reader){
+			return E_OUTOFMEMORY;
+		}
+		hr = getmp3info(reader);
+		
+		ReaderClose(reader);
+		
 		if (hr != S_OK){
 			return VFW_E_TYPE_NOT_ACCEPTED;
 		}
@@ -299,6 +314,7 @@ HRESULT CMP3ParseFilter::CheckInputType(const CMediaType* mtIn)
 void CMP3ParseFilter::BuildWaveFormatEx(PWAVEFORMATEX * ppwfe,DWORD * pdwLength)
 {
 	PWAVEFORMATEX p = PWAVEFORMATEX(malloc(sizeof(WAVEFORMATEX)+MPEGLAYER3_FLAG_PADDING_ON));
+	mp3info& info = m_info;
 
 	p->wFormatTag = 0x55;
 	p->nChannels = info.nch;
@@ -431,27 +447,59 @@ HRESULT CMP3ParseFilter::ReaderClose(IAsyncReader *reader)
 // return the position of the first mp3 audio header
 long CMP3ParseFilter::read_tags(mp3info& info, IAsyncReader *reader, const LONGLONG Total){
 	
-	long hpos = 0;
+	long hpos = info.hpos;;
+	info.payload_size = Total;
+	info.payload_end_postiion = info.payload_size;
+	id3tag& id3 = m_id3;
 	// getid3v2:
+	int trying_again = 0;
 	{
+again:
 		unsigned char c1,c2,c3,c4;
+	LONGLONG hpos_b4 = hpos;
 
 		ReaderRead(hpos,1,&c1,reader);	hpos ++;
 		ReaderRead(hpos,1,&c2,reader);	hpos ++;
 		ReaderRead(hpos,1,&c3,reader);	hpos ++;
 		ReaderRead(hpos,1,&c4,reader);	hpos ++;
-
+		
 		if (c1 == 'I' && c2 == 'D' && c3 == '3'/* && c4 == 2*/) {
-			hpos = 6;
+			 
+				hpos = hpos_b4+6;;
+			
+				
 			ReaderRead(hpos,1,&c1,reader);	hpos ++;
 			ReaderRead(hpos,1,&c2,reader);	hpos ++;
 			ReaderRead(hpos,1,&c3,reader);	hpos ++;
 			ReaderRead(hpos,1,&c4,reader);	hpos ++;
-			hpos = c1*2097152+c2*16384+c3*128+c4;
+			hpos += c1*2097152+c2*16384+c3*128+c4;
 			static const int ID3_HEADER_SIZE = 10;
 			hpos += ID3_HEADER_SIZE;
+			info.payload_size -= hpos;
+			if (info.payload_size < 0){
+				return hpos_b4;
+			}
 		}
-		else hpos = 0;
+		else{
+			
+			if (!trying_again){
+			std::string s;;
+			s.resize(65535);
+			HRESULT	hr = ReaderRead(0, 65535, &s[0], reader);
+				if (hr == S_OK){
+					std::transform(s.begin(), s.end(),s.begin(), ::toupper);
+					int pos = s.find("ID3");
+					if (pos != std::string::npos){
+						hpos = pos;
+						trying_again = 1;
+						goto again;
+					}else{
+						hpos = 0;
+					}
+				}
+			}
+			hpos = 0;
+		}
 	}
 
 	// get id3v1:
@@ -461,13 +509,14 @@ long CMP3ParseFilter::read_tags(mp3info& info, IAsyncReader *reader, const LONGL
 	if (strncmp(id3.tag,"TAG",3) == 0) {
 		info.nbytes = info.nbytes - 128;
 		info.payload_size -= 128;
-		ASSERT(info.payload_size > 0);
-		
 		info.payload_end_postiion -= 128;
-		ASSERT(info.payload_end_postiion > 0);
+		
 		
 	}
 
+	ASSERT(info.payload_end_postiion > 0);
+	ASSERT(info.payload_size > 0);
+		
 	return hpos;
 }
 
@@ -479,7 +528,9 @@ enum parse_mp3_info_result{
 	PARSE_MP_ERROR_BAD_FREQ_INDEX,
 	PARSE_MP_ERROR_BAD_LSF,
 	PARSE_MP_ERROR_BAD_SECOND_INDEX,
-	PARSE_MP_ERROR_BAD_BITRATE_INDEX
+	PARSE_MP_ERROR_BAD_BITRATE_INDEX,
+	PARSE_MP_ERROR_GENERAL,
+	PARSE_MP_ERROR_BAD_LAYER
 
 };
 
@@ -491,34 +542,19 @@ int parse_mp3_header(unsigned long hpos, mp3info& info, const unsigned long head
 	info.hpos = hpos;
 	info.framesize = 0;
 
-	const long PICTURE_START_CODE = 0x00000100;
-	// MPEG ヘッダ検出で終了。
-	// なぜかMPEGシステムの時も接続されそうになるのでその対策
-	{
-		if((head & 0xffffff00) == 0x00000100){
-			return -PARSE_MP_ERROR_FAILED_FIRST_CHECK;
-		}
-	}
-
-	{
-		//MP3 のヘッダとよく似ているが、Layer-4は存在しない。
-		if ((head & 0xfff00000) == 0xfff00000 && 4-((head>>17)&0x3) == 4){
-			if (consec_frames >= 2)
-				ASSERT("NOT LAYER THREE" == NULL);
-			return -PARSE_MP_ERROR_NOT_MP3;
-		}
-	}
 
 	if (!head_check(head)){
 		return -PARSE_MP_ERROR_HEAD_CHECK_FAILED;
 	}
 
-
 	
 	int bitrate_index,mode,nch,lay,extension,mpeg25,padding, lsf,srate;
 
-	
-	
+	lay = 4-((head>>17)&3);
+	if (lay <= 0 || lay > 3){
+		return -PARSE_MP_ERROR_BAD_LAYER;
+	}
+		
 
     if( head & (1<<20) ) {
 		lsf = (head & (1<<19)) ? 0x0 : 0x1;
@@ -527,70 +563,101 @@ int parse_mp3_header(unsigned long hpos, mp3info& info, const unsigned long head
 		lsf = 1;
 		mpeg25 = 1;
     }
-
-    bitrate_index = ((head>>12)&0xf);
+	info.lsf  = lsf;
+		
+	if (lsf >=2)
+		return -PARSE_MP_ERROR_BAD_LSF;
+    
+	bitrate_index = ((head>>12)&0xf);
 	padding       = ((head>>9)&0x1);
     mode          = ((head>>6)&0x3);
     nch           = (mode == MPG_MD_MONO) ? 1 : 2;
-	lay           = 4-((head>>17)&3);
 	extension     = ((head>>8)&0x1);
 
-	if(mpeg25) srate = 6 + ((head>>10)&0x3);
-    else srate = ((head>>10)&0x3) + (lsf*3);
 
-	if (lay != 3)
-	{
-		ASSERT("MPEG Layer is not THREE" == NULL);
-		return -PARSE_MP_ERROR_NOT_MP3;
-
+	
+	static const unsigned int FREQ_MAX = 9;
+	if(mpeg25) {
+		srate = 6 + ((head>>10)&0x3);
+	}
+    else { 
+		srate = ((head>>10)&0x3) + (lsf*3);
 	}
 
-	info.lsf  = lsf;
-	static const unsigned int FREQ_MAX = 9;
-	// freq[9]
 	if (srate >= FREQ_MAX){
 		return -PARSE_MP_ERROR_BAD_FREQ_INDEX;
 	}
+
 	info.freq = freqs[srate];
 	info.nch  = nch;
-	
-	
-	unsigned int tablindex_1 = lsf;
-	unsigned int tablindex_2 = 3-1;
-	unsigned int tablindex_3 = bitrate_index;
 
-	if (tablindex_1 >=2){
-		return -PARSE_MP_ERROR_BAD_LSF;
-	}
-	if (tablindex_2 >= 3){
-		return -PARSE_MP_ERROR_BAD_SECOND_INDEX;
-	}
-	if (tablindex_2 >= 16){
+	if (bitrate_index >= 16)
 		return -PARSE_MP_ERROR_BAD_BITRATE_INDEX;
+	
+	long sz = 0;
+	switch(lay)
+	{
+#ifndef NO_LAYER1
+		case 1:
+			info.bitrate = (long) tabsel_123[lsf][0][bitrate_index] ;
+			info.framesize  = info.bitrate * 12000;
+			info.framesize /= freqs[srate];
+			info.framesize  = ((info.framesize+padding)<<2)-4;
+		break;
+#endif
+#ifndef NO_LAYER2
+		case 2:
+			// fr->do_layer = do_layer2;
+			info.bitrate = tabsel_123[lsf][1][bitrate_index];
+			info.framesize = (144000 * info.bitrate / info.freq) + padding;
+
+		break;
+#endif
+#ifndef NO_LAYER3
+		case 3:
+			//fr->do_layer = do_layer3;
+			/*/
+			if(lsf)
+				fr->ssize = (fr->stereo == 1) ? 9 : 17;
+			else
+				fr->ssize = (fr->stereo == 1) ? 17 : 32;
+			/*/
+			// if(fr->error_protection)
+			// fr->ssize += 2;
+			info.bitrate = (long) tabsel_123[lsf][2][bitrate_index] ;
+			info.framesize  = (long) info.bitrate * 144000;
+			info.framesize /= freqs[srate]<<(lsf);
+			info.framesize = info.framesize + padding;
+		break;
+#endif 
+		default:
+			//if(NOQUIET) error1("Layer type %i not supported in this build!", fr->lay); 
+			return -PARSE_MP_ERROR_GENERAL;
 	}
 
-	info.framesize = tabsel_123[tablindex_1][tablindex_2][tablindex_3]*144000/(info.freq<<lsf)+padding;
+
 	if (info.duration == 0){
 		// FIXME: each frame should have its *own* duration, not just the first frame!
-		double dur = (double)info.framesize * 8.0 / (tabsel_123[lsf][3-1][bitrate_index] * 1000);
+		double dur = (double)(info.framesize * 8.0) / (info.bitrate * 1000);
 		info.duration = dur * UNITS;
 	}
+	//
 	info.frames++;
 	return info.framesize;
 }
 
 
-HRESULT CMP3ParseFilter::getmp3info(void)
+HRESULT CMP3ParseFilter::getmp3info(IAsyncReader* reader, const int full_scan_starts_at)
 {
 	unsigned long head = 0;
-	memset(&info, 0, sizeof(info));
+	mp3info info = {0};
 	mp3info first_header = {0};
-
-
-	IAsyncReader *reader = ReaderOpen();
-	if (!reader){
-		return E_OUTOFMEMORY;
+	if (full_scan_starts_at >= 0){
+		info.hpos = full_scan_starts_at;
 	}
+	
+	ASSERT(reader);
+	
 	
 	LONGLONG Total = 0;
 	HRESULT hr = ReaderLength(&Total,reader);
@@ -601,8 +668,15 @@ HRESULT CMP3ParseFilter::getmp3info(void)
 	info.nbytes = Total;
 	info.payload_size = Total;
 	info.payload_end_postiion = Total;
+	LONGLONG hpos = 0;
+	hpos = (LONGLONG)read_tags(info, reader, Total);
+	
+	if (info.payload_size < 0){
 
-	LONGLONG hpos = (LONGLONG)read_tags(info, reader, Total);
+		info.payload_size = Total;
+		info.payload_end_postiion = Total;
+	}
+	
 
 	bool FindHeader = false;
 	long approx_frames = -1;
@@ -612,11 +686,20 @@ HRESULT CMP3ParseFilter::getmp3info(void)
 
 	int consec_frames = 0;
 	static const int NFRAMES_CHECK = 4;
-	static const int SCAN_BYTES = 65536;
-	int i = 0;
+	LONGLONG SCAN_BYTES = full_scan_starts_at >= 0 ? info.payload_size : 65535;
+	LONGLONG i = 0;
 	int tries = 0;
+	int bitrate = 0;
+	int fails = 0;
+	
+	LONGLONG vbr_dur = 0;
+	int prev_bitrate =0 ;
+	LONGLONG frame_accum = 0;
 
 	while (i < SCAN_BYTES) {
+		if (hpos +i >= info.payload_end_postiion){
+			break;
+		}
 		hr = ReaderRead(hpos+i,4,(BYTE *)&head,reader);
 		if(hr == S_FALSE) 
 		{
@@ -628,60 +711,148 @@ HRESULT CMP3ParseFilter::getmp3info(void)
 		int parse_result = parse_mp3_header(hpos+i, info, head, consec_frames);
 		if (parse_result > 0){
 			consec_frames++;
+			
+			if (!bitrate){
+				bitrate = info.bitrate;
+			}else{
+				if (bitrate != prev_bitrate){
+					m_info.vbr = true;	
+					if (full_scan_starts_at == -1){
+						return getmp3info(reader, first_header.hpos);
+						
+					}
+				}
+			}
+			prev_bitrate = info.bitrate;
 			i += info.framesize;
 			if (info.frames == 1){
 				first_header = info;
-				info.payload_size -=hpos;
-				ASSERT(info.payload_size > 0);
+				
+				
+				if (full_scan_starts_at == -1){
+					
+					char first_frame_data[64] = {0};
+					hr = ReaderRead(first_header.hpos + MPG_HEADER_SIZE, 64, &first_frame_data[0], reader);
+					if (hr != S_OK){
+						return hr;
+					}
+					std::string s(first_frame_data, 64);
+					std::transform(s.begin(), s.end(),s.begin(), ::toupper);
+					
+					if (s.find("XING") != std::string::npos){
+						m_info.vbr = true;
+					}else{
+						if  (s.find("VBRI") != std::string::npos){
+							m_info.vbr = true;
+						}
+					}
+					
+					if (m_info.vbr){
+						return getmp3info(reader, first_header.hpos);
+					}
+						
+				}
 				
 			}
 			
-			ASSERT(info.framesize && "here comes a divide by zero fatal error ...");
-			if (approx_frames == 0){
-				approx_frames = info.payload_size / info.framesize;
-			}
-			if (consec_frames >= NFRAMES_CHECK){
-				FindHeader = true;
-				if (tries -1 > NFRAMES_CHECK){
-					ATLTRACE("Finally! Found first header at header position: %ld after %ld tries.\n", (long)first_header.hpos, (long)tries);
+			if (full_scan_starts_at == -1){
+				if (approx_frames <= 0){
+					approx_frames = info.payload_size / info.framesize;
 				}
-				break;
+				if (consec_frames >= NFRAMES_CHECK){
+					FindHeader = true;
+					if (tries -1 > NFRAMES_CHECK){
+						ATLTRACE("Finally! Found first header at header position: %ld after %ld tries.\n", (long)first_header.hpos, (long)tries);
+					}
+					break;
+				}
+			}else{
+
+				info.frames++;
+				approx_frames = info.frames;
+				vbr_dur += info.duration;
+				frame_accum += info.framesize;
 			}
 			
 		}else{
 
 			ATLTRACE("frame, at index %d and header file position: %ld not where expected\n", info.frames, (long)hpos+i); 
+			LONGLONG sz = info.payload_size;
+			ATLTRACE("payload end position is: %lld\n");
+			ATLTRACE("Payload size is %lld\n", sz);
+			LONGLONG distance_from_end = info.payload_end_postiion - (hpos+i);
+			ATLTRACE("Distance from end is: %lld\n", distance_from_end); 
+			fails++;
+			if (fails >= 256 && info.frames >= 4){
+				return E_FAIL;
+			}
+
+			
+			
+			int avg_framesize = 0;
+			if (info.frames){
+				avg_framesize = frame_accum / info.frames;
+
+			}
+
+			if (avg_framesize > 0){
+				if (distance_from_end < avg_framesize * fails){
+					ATLTRACE("Found truncated final frame\n");
+					break;
+				}
+			}
+			if (distance_from_end < 8192){
+				break;
+			}
 			approx_frames = 0;
 			i++;
 			consec_frames = 0;
 			first_header.framesize = 0;
 			info.frames = 0;
+			frame_accum = 0;
+
 		}
 		
 		tries++;
 		
 	}; // for loop
 
-	if(FindHeader == false) {
-		ReaderClose(reader);
+	if(FindHeader == false && info.frames <= 1) {
+
 		return S_FALSE;
 	}
 	
-	approx_frames = info.payload_size / first_header.framesize;
-	LONGLONG duration = info.duration * approx_frames;
-	info.duration = duration;
+	
 	hpos = first_header.hpos;
-	ReaderClose(reader);
+	int vbr = m_info.vbr;
 
+	if(!m_info.vbr){
+		
+		approx_frames = info.payload_size / first_header.framesize;
+		LONGLONG duration = info.duration * approx_frames;
+		info.duration = duration;
+		
+	}else{
+		info.duration = vbr_dur;
+	}
+	
+	m_info = info;
+	m_info.vbr = vbr;
+	
+	const double d = (double)info.duration / (double)UNITS;
+	ATLTRACE("have %f seconds\n", d);
+
+	
 	return S_OK; 
 }
 
 
-
+#ifdef USE_GET_FRAME_INFO
 HRESULT CMP3ParseFilter::getframeinfo(void)
 {
-	/*フレームを走査し、時間とオフセットを記録する。*/
+
 	IAsyncReader *reader;
+	mp3info& info = m_info;
 	LONGLONG fpos;
 	DWORD framesize;
 	double duration;
@@ -706,7 +877,7 @@ HRESULT CMP3ParseFilter::getframeinfo(void)
 	fpos = info.hpos;
 	duration = 0;
 
-	/*先頭にあたる frameinfo はダミー*/
+
 	frameinfo.time = -1;
 	frameinfo.offset = -1;
 	frameinfo.size = -1;
@@ -718,9 +889,7 @@ HRESULT CMP3ParseFilter::getframeinfo(void)
 
 	preframeinfo = &frameinfo;
 
-	int j = 0 ;						//エンコーダの不正でフレームサイズが
-								//正しくない場合の補正カウンタ。
-								//-1 ~ 1
+	int j = 0 ;						
 	bool supplementary_framesize = false;
 
 	for(i=0;;i++){
@@ -732,8 +901,7 @@ HRESULT CMP3ParseFilter::getframeinfo(void)
 			break;
 		}
 
-		if(!head_check(head = BSwap(head))){//フレームヘッダが見つからない時は、
-											// +-1の範囲をチェック
+		if(!head_check(head = BSwap(head))){
 			if(supplementary_framesize == false){
 				supplementary_framesize = true;
 				fpos -= 1;
@@ -790,15 +958,15 @@ HRESULT CMP3ParseFilter::getframeinfo(void)
 	info.duration = (REFERENCE_TIME)(duration * 10000000);
 
 	info.frames = i;
-	this->m_vec_frames.resize(info.frames);
-
+	// this->m_vec_frames.resize(info.frames);
+	
 	ReaderClose(reader);
 
 //	m_llCurrent = info.hpos;
 
 	return S_OK; 
 }
-
+#endif
 
 STDMETHODIMP CMP3ParseFilter::NonDelegatingQueryInterface(REFIID riid, void **p)
 {

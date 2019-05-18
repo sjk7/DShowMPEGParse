@@ -6,9 +6,23 @@
 #include "parser.h"
 #include "mp3.h"
 #include <VECTOR>
-#include "my_buffer.h"
 
-typedef std::vector<FRAMEINFO> frame_vec_t;
+
+// typedef std::vector<FRAMEINFO> frame_vec_t;
+
+// vbr seek helper
+struct header_hint
+{
+	header_hint(LONGLONG pos, LONGLONG dur, size_t index) 
+		: hpos(pos), dur(dur), index(index){}
+	
+	LONGLONG hpos;
+	LONGLONG dur;
+	size_t index;
+
+};
+
+typedef std::vector<header_hint> header_hints;
 
 
 class CMP3ParseFilter : public CParserFilter
@@ -16,8 +30,8 @@ class CMP3ParseFilter : public CParserFilter
 public:
 	static CUnknown * WINAPI CreateInstance(LPUNKNOWN punk, HRESULT *pHr);
 	
-	frame_vec_t m_vec_frames;
-	my::buffer<BYTE> m_filebuf;
+	header_hints m_vbr_header_hints;
+	std::vector<BYTE> m_filebuf;
 
 	CMP3ParseFilter(LPUNKNOWN pUnk, HRESULT *pHr);
 	~CMP3ParseFilter();
@@ -64,7 +78,7 @@ private:
 	HRESULT ReaderClose(IAsyncReader *reader);
 
 	// finds the first frame, and gets tags and file size info
-	HRESULT getmp3info(void);
+	HRESULT getmp3info(IAsyncReader* reader, int full_scan_starts_at = -1);
 
 	//MP3 の情報を得る その２＆フレームの情報を得る
 	HRESULT getframeinfo(void);
@@ -77,8 +91,8 @@ private:
 	LONGLONG rtMediaStart;				//処理しているサンプルの最初の時間
 	LONGLONG rtMediaStop;				//処理しているサンプルの終わりの時間
 
-	mp3info info;
-	id3tag id3;
+	mp3info m_info;
+	id3tag m_id3;
 
 	bool checked_input;					//getmp3infoでチェックされたか。
 										//これが通っていなければ、getframeinfoは呼ばれない。

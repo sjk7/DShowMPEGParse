@@ -11,8 +11,8 @@ void test_buf() {
     ASSERT(buf.size() == 0);
     buf.resize(buf.capacity());
     ASSERT(buf.size() == buf.capacity() && buf.capacity() == 8192);
-
-    my::mem_view<my::mem_buf<unsigned char> > v = my::mem_view(buf, 0, 10);
+	typedef my::mem_view<my::mem_buf<unsigned char> > view_t;
+    view_t v = view_t(buf, 0, 10);
 }
 int main() {
     constexpr size_t sz = sizeof(size_t);
